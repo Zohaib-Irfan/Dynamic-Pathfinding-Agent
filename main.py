@@ -233,7 +233,7 @@ def main():
                         gen_search = None
                         route_cost = len(path)
                         
-                        if route_cost > 0:
+                        if route_cost > 0 and config.dynamic_mode:
                             moving_agent = True
                             active_path = path
                             idx_pos = 0
