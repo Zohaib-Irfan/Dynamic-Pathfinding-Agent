@@ -202,6 +202,10 @@ def main():
                         started = False
                         search_generator = None
                         exec_time = (time.perf_counter() - start_time) * 1000
+                        root = tk.Tk()
+                        root.withdraw()
+                        messagebox.showinfo("No Path", "No valid path exists between start and end nodes.")
+                        root.destroy()
                         break
                         
                     finished, visited, path = result

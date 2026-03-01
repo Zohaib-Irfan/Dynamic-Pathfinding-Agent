@@ -43,7 +43,8 @@ def a_star_search(draw, grid, start, end, heuristic_type):
 
         if current == end:
             path = reconstruct_path(came_from, end, draw)
-            return True, nodes_visited, path
+            yield True, nodes_visited, path
+            return
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -83,7 +84,8 @@ def gbfs_search(draw, grid, start, end, heuristic_type):
 
         if current == end:
             path = reconstruct_path(came_from, end, draw)
-            return True, nodes_visited, path
+            yield True, nodes_visited, path
+            return
 
         for neighbor in current.neighbors:
             if neighbor not in visited_nodes and not neighbor.is_barrier():
