@@ -72,20 +72,28 @@ def get_config_from_ui():
     return config
 
 def draw_metrics(win, nodes_visited, path_cost, exec_time_ms, algo, heur, dyn):
-    pygame.draw.rect(win, (40, 40, 40), (0, WIDTH, WIDTH, 100))
+    # A slightly nicer dark grey background for the UI panel
+    pygame.draw.rect(win, (30, 32, 35), (0, WIDTH, WIDTH, 100))
+    pygame.draw.line(win, (100, 100, 100), (0, WIDTH), (WIDTH, WIDTH), 2)
+    
     dyn_text = "ON" if dyn else "OFF"
+    dyn_color = (0, 255, 0) if dyn else (255, 100, 100)
     
-    text_algo = STAT_FONT.render(f"Algo: {algo} ({heur}) | Dyn: {dyn_text}", 1, WHITE)
-    text_visited = STAT_FONT.render(f"Nodes Visited: {nodes_visited}", 1, WHITE)
-    text_cost = STAT_FONT.render(f"Path Cost: {path_cost}", 1, WHITE)
-    text_time = STAT_FONT.render(f"Exec Time: {exec_time_ms:.2f} ms", 1, WHITE)
-    text_help = STAT_FONT.render("LMB: Draw | RMB: Erase | SPACE: Start | C: Clear | R: Rand Maze", 1, (200, 200, 200))
+    text_algo = STAT_FONT.render(f"Algo: {algo} ({heur})", True, WHITE)
+    text_dyn = STAT_FONT.render(f"Dyn: {dyn_text}", True, dyn_color)
+    text_visited = STAT_FONT.render(f"Nodes Visited: {nodes_visited}", True, (200, 200, 255))
+    text_cost = STAT_FONT.render(f"Path Cost: {path_cost}", True, (200, 255, 200))
+    text_time = STAT_FONT.render(f"Exec Time: {exec_time_ms:.2f} ms", True, (255, 200, 200))
+    text_help = STAT_FONT.render("LMB: Draw | RMB: Erase | SPACE: Start | C: Clear | R: Rand Maze", True, (150, 150, 150))
     
-    win.blit(text_algo, (10, WIDTH + 5))
-    win.blit(text_visited, (10, WIDTH + 40))
-    win.blit(text_cost, (WIDTH // 2, WIDTH + 5))
-    win.blit(text_time, (WIDTH // 2, WIDTH + 40))
-    win.blit(text_help, (10, WIDTH + 75))
+    win.blit(text_algo, (20, WIDTH + 10))
+    win.blit(text_dyn, (250, WIDTH + 10))
+    win.blit(text_visited, (20, WIDTH + 40))
+    
+    win.blit(text_cost, (WIDTH // 2 + 50, WIDTH + 10))
+    win.blit(text_time, (WIDTH // 2 + 50, WIDTH + 40))
+    
+    win.blit(text_help, (20, WIDTH + 70))
 
 def main():
     config = get_config_from_ui()
