@@ -13,15 +13,15 @@ GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
 
 class Node:
-    def __init__(self, row, col, width, total_rows):
-        self.row = row
-        self.col = col
-        self.x = row * width
-        self.y = col * width
+    def __init__(self, r, c, w, t_rows):
+        self.row = r
+        self.col = c
+        self.x = r * w
+        self.y = c * w
         self.color = WHITE
         self.neighbors = []
-        self.width = width
-        self.total_rows = total_rows
+        self.width = w
+        self.total_rows = t_rows
 
     def get_pos(self):
         return self.row, self.col
@@ -62,8 +62,8 @@ class Node:
     def make_path(self):
         self.color = GREEN
 
-    def draw(self, win):
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.width))
 
     def update_neighbors(self, grid):
         self.neighbors = []

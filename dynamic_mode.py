@@ -1,22 +1,22 @@
 import random
 
-def spawn_random_obstacle(grid, start, end, spawn_chance_percentage, current_path=None):
-    if random.random() > (spawn_chance_percentage / 100.0):
+def spawn_random_obstacle(grid_matrix, p_start, p_end, spawn_chance_pct, active_path=None):
+    if random.random() > (spawn_chance_pct / 100.0):
         return False
         
-    empty_nodes = []
-    for row in grid:
-        for node in row:
-            if not node.is_barrier() and node != start and node != end:
-                empty_nodes.append(node)
+    available_nodes = []
+    for r in grid_matrix:
+        for n in r:
+            if not n.is_barrier() and n != p_start and n != p_end:
+                available_nodes.append(n)
                 
-    if not empty_nodes:
+    if len(available_nodes) == 0:
         return False
         
-    target_node = random.choice(empty_nodes)
-    target_node.make_barrier()
+    selected_node = random.choice(available_nodes)
+    selected_node.make_barrier()
     
-    if current_path and target_node in current_path:
+    if active_path and selected_node in active_path:
         return True
         
     return False

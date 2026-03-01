@@ -113,39 +113,39 @@ def main():
     start = None
     end = None
     
-    run = True
-    started = False
+    app_running = True
+    algo_started = False
     
-    nodes_visited = 0
-    path_cost = 0
-    exec_time = 0
+    count_visited = 0
+    route_cost = 0
+    time_taken = 0
     
-    in_transit = False
-    current_path = []
-    agent_pos_idx = 0
-    transit_speed_ms = 50
-    last_transit_time = 0
+    moving_agent = False
+    active_path = []
+    idx_pos = 0
+    speed_transit_ms = 50
+    time_last_move = 0
     
-    search_generator = None
-    start_time = 0
+    gen_search = None
+    t_start = 0
     
-    def draw_func():
+    def render_all():
         draw(WIN, grid, ROWS, WIDTH)
-        draw_metrics(WIN, nodes_visited, path_cost, exec_time, config.algorithm, config.heuristic, config.dynamic_mode)
+        draw_metrics(WIN, count_visited, route_cost, time_taken, config.algorithm, config.heuristic, config.dynamic_mode)
         pygame.display.update()
 
-    clock = pygame.time.Clock()
+    fps_clock = pygame.time.Clock()
     
-    while run:
-        clock.tick(60)
-        draw_func()
+    while app_running:
+        fps_clock.tick(60)
+        render_all()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                app_running = False
                 return False
                 
-            if started or in_transit:
+            if algo_started or moving_agent:
                 continue
                 
             if pygame.mouse.get_pressed()[0]:
@@ -173,23 +173,23 @@ def main():
                 if node == end: end = None
                 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r and not started and not in_transit:
+                if event.key == pygame.K_r and not algo_started and not moving_agent:
                     if start and end:
                         generate_random_maze(grid, start, end, config.density)
                         
-                if event.key == pygame.K_c and not started and not in_transit:
+                if event.key == pygame.K_c and not algo_started and not moving_agent:
                     start = None
                     end = None
                     grid = make_grid(ROWS, WIDTH)
-                    nodes_visited = 0
-                    path_cost = 0
-                    exec_time = 0
+                    count_visited = 0
+                    route_cost = 0
+                    time_taken = 0
                     
-                if event.key == pygame.K_ESCAPE and not started and not in_transit:
-                    run = False
+                if event.key == pygame.K_ESCAPE and not algo_started and not moving_agent:
+                    app_running = False
                     return True
                     
-                if event.key == pygame.K_SPACE and not started and not in_transit:
+                if event.key == pygame.K_SPACE and not algo_started and not moving_agent:
                     if start and end:
                         for row in grid:
                             for node in row:
@@ -197,15 +197,15 @@ def main():
                         
                         reset_search(grid, start, end)
                         
-                        started = True
+                        algo_started = True
                         if config.algorithm == "A*":
-                            search_generator = a_star_search(lambda: None, grid, start, end, config.heuristic)
+                            gen_search = a_star_search(lambda: None, grid, start, end, config.heuristic)
                         else:
-                            search_generator = gbfs_search(lambda: None, grid, start, end, config.heuristic)
+                            gen_search = gbfs_search(lambda: None, grid, start, end, config.heuristic)
                         
-                        start_time = time.perf_counter()
+                        t_start = time.perf_counter()
                         
-        if started and search_generator:
+        if algo_started and gen_search:
             try:
                 steps_per_frame = 1 if config.delay_ms > 0 else 50
                 
@@ -213,11 +213,11 @@ def main():
                     if config.delay_ms > 0:
                         pygame.time.delay(config.delay_ms)
                         
-                    result = next(search_generator, None)
+                    result = next(gen_search, None)
                     if result is None:
-                        started = False
-                        search_generator = None
-                        exec_time = (time.perf_counter() - start_time) * 1000
+                        algo_started = False
+                        gen_search = None
+                        time_taken = (time.perf_counter() - t_start) * 1000
                         root = tk.Tk()
                         root.withdraw()
                         messagebox.showinfo("No Path", "No valid path exists between start and end nodes.")
@@ -225,45 +225,45 @@ def main():
                         break
                         
                     finished, visited, path = result
-                    nodes_visited = visited
+                    count_visited = visited
                     
                     if finished:
-                        exec_time = (time.perf_counter() - start_time) * 1000
-                        started = False
-                        search_generator = None
-                        path_cost = len(path)
+                        time_taken = (time.perf_counter() - t_start) * 1000
+                        algo_started = False
+                        gen_search = None
+                        route_cost = len(path)
                         
-                        if path_cost > 0:
-                            in_transit = True
-                            current_path = path
-                            agent_pos_idx = 0
-                            last_transit_time = pygame.time.get_ticks()
+                        if route_cost > 0:
+                            moving_agent = True
+                            active_path = path
+                            idx_pos = 0
+                            time_last_move = pygame.time.get_ticks()
                         break
                         
             except StopIteration:
-                exec_time = (time.perf_counter() - start_time) * 1000
-                started = False
-                search_generator = None
+                time_taken = (time.perf_counter() - t_start) * 1000
+                algo_started = False
+                gen_search = None
                 
-        if in_transit and config.dynamic_mode:
+        if moving_agent and config.dynamic_mode:
             current_t = pygame.time.get_ticks()
-            if current_t - last_transit_time > transit_speed_ms:
-                last_transit_time = current_t
+            if current_t - time_last_move > speed_transit_ms:
+                time_last_move = current_t
                 
-                if agent_pos_idx < len(current_path):
-                    prev_node = current_path[agent_pos_idx-1] if agent_pos_idx > 0 else start
+                if idx_pos < len(active_path):
+                    prev_node = active_path[idx_pos-1] if idx_pos > 0 else start
                     if prev_node != start and prev_node != end:
                         prev_node.make_path()
                         
-                    current_node = current_path[agent_pos_idx]
+                    current_node = active_path[idx_pos]
                     if current_node != end:
                         current_node.color = PURPLE
                         
-                    agent_pos_idx += 1
+                    idx_pos += 1
                     
-                    replan_needed = spawn_random_obstacle(grid, start, end, 5, current_path[agent_pos_idx:])
+                    replan_needed = spawn_random_obstacle(grid, start, end, 5, active_path[idx_pos:])
                     if replan_needed:
-                        in_transit = False
+                        moving_agent = False
                         reset_search(grid, current_node, end)
                         
                         if start != current_node:
@@ -276,15 +276,15 @@ def main():
                             for node in row:
                                 node.update_neighbors(grid)
                         
-                        started = True
+                        algo_started = True
                         if config.algorithm == "A*":
-                            search_generator = a_star_search(lambda: None, grid, start, end, config.heuristic)
+                            gen_search = a_star_search(lambda: None, grid, start, end, config.heuristic)
                         else:
-                            search_generator = gbfs_search(lambda: None, grid, start, end, config.heuristic)
+                            gen_search = gbfs_search(lambda: None, grid, start, end, config.heuristic)
                             
-                        start_time = time.perf_counter()
+                        t_start = time.perf_counter()
                 else:
-                    in_transit = False
+                    moving_agent = False
                     
     pygame.quit()
     return False
