@@ -21,6 +21,7 @@ class AppConfig:
         self.algorithm = "A*"
         self.heuristic = "Manhattan"
         self.density = 30
+        self.delay_ms = 0
         self.dynamic_mode = False
         self.ready = False
 
@@ -47,6 +48,10 @@ def get_config_from_ui():
     density_var = tk.IntVar(value=30)
     tk.Entry(root, textvariable=density_var).pack()
     
+    tk.Label(root, text="Search Viz Delay (ms):").pack(pady=5)
+    delay_var = tk.IntVar(value=0)
+    tk.Entry(root, textvariable=delay_var).pack()
+    
     dyn_var = tk.BooleanVar(value=False)
     tk.Checkbutton(root, text="Enable Dynamic Mode", variable=dyn_var).pack(pady=5)
     
@@ -56,6 +61,7 @@ def get_config_from_ui():
             config.algorithm = algo_var.get()
             config.heuristic = heur_var.get()
             config.density = density_var.get()
+            config.delay_ms = delay_var.get()
             config.dynamic_mode = dyn_var.get()
             config.ready = True
             root.destroy()
@@ -196,7 +202,14 @@ def main():
                         
         if started and search_generator:
             try:
-                for _ in range(50):
+                # If delay is > 0, we only process 1 step per frame.
+                # If delay is 0, we unroll the loop up to 50 steps per frame for max speed.
+                steps_per_frame = 1 if config.delay_ms > 0 else 50
+                
+                for _ in range(steps_per_frame):
+                    if config.delay_ms > 0:
+                        pygame.time.delay(config.delay_ms)
+                        
                     result = next(search_generator, None)
                     if result is None:
                         started = False
