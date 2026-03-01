@@ -37,11 +37,11 @@ def get_config_from_ui():
     
     tk.Label(root, text="Algorithm:").pack(pady=5)
     algo_var = tk.StringVar(value="A*")
-    ttk.Combobox(root, textvariable=algo_var, values=["A*", "GBFS"]).pack()
+    ttk.Combobox(root, textvariable=algo_var, values=["A*", "GBFS"], state="readonly").pack()
     
     tk.Label(root, text="Heuristic:").pack(pady=5)
     heur_var = tk.StringVar(value="Manhattan")
-    ttk.Combobox(root, textvariable=heur_var, values=["Manhattan", "Euclidean"]).pack()
+    ttk.Combobox(root, textvariable=heur_var, values=["Manhattan", "Euclidean"], state="readonly").pack()
     
     tk.Label(root, text="Random Map Density (%):").pack(pady=5)
     density_var = tk.IntVar(value=30)
