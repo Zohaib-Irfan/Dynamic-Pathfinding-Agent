@@ -30,7 +30,7 @@ def get_config_from_ui():
     
     root = tk.Tk()
     root.title("Pathfinding Config")
-    root.geometry("350x300")
+    root.geometry("350x400")
     
     tk.Label(root, text="Grid Size (NxN):").pack(pady=5)
     size_var = tk.IntVar(value=50)
@@ -48,7 +48,7 @@ def get_config_from_ui():
     density_var = tk.IntVar(value=30)
     tk.Entry(root, textvariable=density_var).pack()
     
-    tk.Label(root, text="Search Viz Delay (ms):").pack(pady=5)
+    tk.Label(root, text="Delay (ms):").pack(pady=5)
     delay_var = tk.IntVar(value=0)
     tk.Entry(root, textvariable=delay_var).pack()
     
@@ -78,7 +78,7 @@ def get_config_from_ui():
     return config
 
 def draw_metrics(win, nodes_visited, path_cost, exec_time_ms, algo, heur, dyn):
-    # A slightly nicer dark grey background for the UI panel
+
     pygame.draw.rect(win, (30, 32, 35), (0, WIDTH, WIDTH, 100))
     pygame.draw.line(win, (100, 100, 100), (0, WIDTH), (WIDTH, WIDTH), 2)
     
@@ -90,7 +90,7 @@ def draw_metrics(win, nodes_visited, path_cost, exec_time_ms, algo, heur, dyn):
     text_visited = STAT_FONT.render(f"Nodes Visited: {nodes_visited}", True, (200, 200, 255))
     text_cost = STAT_FONT.render(f"Path Cost: {path_cost}", True, (200, 255, 200))
     text_time = STAT_FONT.render(f"Exec Time: {exec_time_ms:.2f} ms", True, (255, 200, 200))
-    text_help = STAT_FONT.render("LMB: Draw | RMB: Erase | SPACE: Start | C: Clear | R: Rand Maze", True, (150, 150, 150))
+    text_help = STAT_FONT.render("LMB: Draw | RMB: Erase | SPACE: Start | C: Clear | R: Rand | ESC: Back", True, (150, 150, 150))
     
     win.blit(text_algo, (20, WIDTH + 10))
     win.blit(text_dyn, (250, WIDTH + 10))
@@ -143,6 +143,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                return False
                 
             if started or in_transit:
                 continue
@@ -184,6 +185,10 @@ def main():
                     path_cost = 0
                     exec_time = 0
                     
+                if event.key == pygame.K_ESCAPE and not started and not in_transit:
+                    run = False
+                    return True
+                    
                 if event.key == pygame.K_SPACE and not started and not in_transit:
                     if start and end:
                         for row in grid:
@@ -202,8 +207,6 @@ def main():
                         
         if started and search_generator:
             try:
-                # If delay is > 0, we only process 1 step per frame.
-                # If delay is 0, we unroll the loop up to 50 steps per frame for max speed.
                 steps_per_frame = 1 if config.delay_ms > 0 else 50
                 
                 for _ in range(steps_per_frame):
@@ -284,6 +287,11 @@ def main():
                     in_transit = False
                     
     pygame.quit()
+    return False
 
 if __name__ == "__main__":
-    main()
+    while True:
+        pygame.init()
+        should_restart = main()
+        if not should_restart:
+            break

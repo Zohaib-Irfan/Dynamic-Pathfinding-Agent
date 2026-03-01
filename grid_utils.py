@@ -4,7 +4,7 @@ from node import Node, WHITE, GREY
 
 def make_grid(rows, width):
     grid = []
-    # width is the screen size, gap is size of each node
+
     gap = width // rows
     for i in range(rows):
         grid.append([])
@@ -29,7 +29,7 @@ def draw(win, grid, rows, width):
             node.draw(win)
 
     draw_grid(win, rows, width)
-    # We don't call pygame.display.update() here all the time to give the main loop control over the UI rendering block
+
 
 def get_clicked_pos(pos, rows, width):
     gap = width // rows
@@ -38,7 +38,6 @@ def get_clicked_pos(pos, rows, width):
     row = y // gap
     col = x // gap
 
-    # constrain to bounds to prevent out-of-index crash 
     row = max(0, min(row, rows - 1))
     col = max(0, min(col, rows - 1))
 
